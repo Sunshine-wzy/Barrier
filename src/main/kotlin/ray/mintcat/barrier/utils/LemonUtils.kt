@@ -1,6 +1,5 @@
 package ray.mintcat.barrier.utils
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location

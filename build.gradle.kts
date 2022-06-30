@@ -21,12 +21,25 @@ taboolib {
     install("expansion-command-helper")
     classifier = null
     version = "6.0.7-41"
+
+    description {
+        desc("Manage your areas.")
+
+        contributors {
+            name("Ray_Hughes")
+            name("Sunshine_wzy")
+        }
+
+        links {
+            name("homepage").url("https://www.mcbbs.net/thread-1313921-1-1.html")
+        }
+    }
 }
 
 repositories {
+    maven { url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/") }
     mavenCentral()
     maven { url = uri("https://repo.tabooproject.org/repository/releases/") }
-    maven { url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/") }
 }
 
 dependencies {

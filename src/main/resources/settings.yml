@@ -1,12 +1,15 @@
 ClaimTool: "APPLE"
-Info:
+
+PolyName:
   Join:
-    main: "欢迎来到 [name]"
-    sub: "欢迎"
-    action:
-      - tell *"测试"
+    message:
+      - join text1
+      - join text2
+      - join text3
+    delay: 0.5
   Leave:
-    main: "离开了 [name]"
-    sub: "再见"
-    action:
-      - tell *"测试"
+    message:
+      - leave text1
+      - leave text2
+      - leave text3
+    delay: 1

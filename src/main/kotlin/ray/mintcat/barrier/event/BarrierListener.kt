@@ -18,6 +18,7 @@ import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.submit
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.concurrent.thread
 
 object BarrierListener {
 
@@ -118,22 +119,42 @@ object BarrierListener {
     }
 
     @SubscribeEvent
-    fun e(event: BarrierPlayerJoinPolyEvent) {
-        event.player.infoTitle(
-            Barrier.config.getString("Info.Join.main")!!.replace("[name]", event.poly.name),
-            Barrier.config.getString("Info.Join.sub")!!.replace("[name]", event.poly.name)
-        )
-        Barrier.config.getStringList("Info.Join.action").eval(event.player)
+    fun onBarrierPlayerJoinPoly(event: BarrierPlayerJoinPolyEvent) {
+        val name = event.poly.name
+        if(Barrier.config.contains(name) && Barrier.config.contains("$name.Join")) {
+            Barrier.config.getDouble("$name.Join.delay").let { delaySecond ->
+                Barrier.config.getStringList("$name.Join.message").let { messages ->
+                    val delay = (delaySecond * 1000).toLong()
 
+                    thread {
+                        messages.forEach {
+                            event.player.sendMessage(it.replace('&', '§'))
+                            Thread.sleep(delay)
+                        }
+                    }
+                }
+            }
+        }
+        
     }
 
     @SubscribeEvent
-    fun e(event: BarrierPlayerLeavePolyEvent) {
-        event.player.infoTitle(
-            Barrier.config.getString("Info.Leave.main")!!.replace("[name]", event.poly.name),
-            Barrier.config.getString("Info.Leave.sub")!!.replace("[name]", event.poly.name)
-        )
-        Barrier.config.getStringList("Info.Leave.action").map { it.replace("[name]", event.poly.name) }.eval(event.player)
+    fun onBarrierPlayerLeavePoly(event: BarrierPlayerLeavePolyEvent) {
+        val name = event.poly.name
+        if(Barrier.config.contains(name) && Barrier.config.contains("$name.Leave")) {
+            Barrier.config.getDouble("$name.Leave.delay").let { delaySecond ->
+                Barrier.config.getStringList("$name.Leave.message").let { messages ->
+                    val delay = (delaySecond * 1000).toLong()
+
+                    thread {
+                        messages.forEach {
+                            event.player.sendMessage(it.replace('&', '§'))
+                            Thread.sleep(delay)
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
