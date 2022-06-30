@@ -1,10 +1,12 @@
 package ray.mintcat.barrier.command
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import ray.mintcat.barrier.Barrier
 import ray.mintcat.barrier.common.BarrierPoly
+import ray.mintcat.barrier.common.LocationPair
 import ray.mintcat.barrier.common.openMenu
 import ray.mintcat.barrier.event.BarrierListener
 import ray.mintcat.barrier.utils.PolyUtils
@@ -57,6 +59,45 @@ object BarrierCommand {
                 BarrierListener.createMap[sender.uniqueId] = mutableListOf()
                 Barrier.polys.add(build)
                 Barrier.save(build.name)
+                sender.info("领地创建成功!")
+            }
+        }
+    }
+
+    // 创建矩形领地
+    @CommandBody
+    val createRectangle = subCommand {
+        dynamic {
+            execute<Player> { sender, context, argument ->
+                val name = context.argument(0)
+                val pair = BarrierListener.createRectangleMap[sender.uniqueId]
+                if (pair?.first == null || pair.second == null) {
+                    sender.error("记录点为空 请手持 &f${Barrier.getRectangleTool().name} &7点击方块")
+                    return@execute
+                }
+                
+                val first = pair.first ?: return@execute
+                val second = pair.second ?: return@execute
+                
+                if (Barrier.polys.firstOrNull { it.name == name } != null) {
+                    sender.error("名称冲突!")
+                    return@execute
+                }
+                val build = BarrierPoly(
+                    name,
+                    sender.uniqueId,
+                    first,
+                    rectangleLocation = LocationPair(first, second)
+                )
+                
+                //money
+                if (Barrier.polys.firstOrNull { PolyUtils.isCoincidence(build, it) } != null) {
+                    sender.error("您的领地和其他领地冲突了 请重新设定领地范围")
+                    return@execute
+                }
+                Barrier.polys.add(build)
+                Barrier.save(build.name)
+                BarrierListener.createRectangleMap.remove(sender.uniqueId)
                 sender.info("领地创建成功!")
             }
         }

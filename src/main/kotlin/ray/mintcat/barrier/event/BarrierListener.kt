@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.inventory.EquipmentSlot
 import ray.mintcat.barrier.Barrier
+import ray.mintcat.barrier.common.LocationPair
 import ray.mintcat.barrier.utils.*
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
@@ -23,6 +24,7 @@ import kotlin.concurrent.thread
 object BarrierListener {
 
     val createMap = ConcurrentHashMap<UUID, MutableList<Location>>()
+    val createRectangleMap = ConcurrentHashMap<UUID, LocationPair>()
 
     @Awake(LifeCycle.ENABLE)
     fun show() {
@@ -48,13 +50,54 @@ object BarrierListener {
     }
 
     @SubscribeEvent
+    fun createRectangleInteract(event: PlayerInteractEvent) {
+        val block = event.clickedBlock ?: return
+        if (block.type == Material.AIR || event.hand == EquipmentSlot.OFF_HAND) {
+            return
+        }
+        //物品判断
+        val item = event.item
+        if (item == null || item.type == Material.AIR || item.type != Barrier.getRectangleTool())
+            return
+        
+        val player = event.player
+        val uuid = player.uniqueId
+        when (event.action) {
+            Action.LEFT_CLICK_BLOCK -> {
+                val pair = createRectangleMap[uuid]
+                if(pair == null) {
+                    createRectangleMap[uuid] = LocationPair(block.location, null)
+                } else {
+                    pair.first = block.location
+                }
+
+                player.info("成功选取第 &f一 &7个点")
+            }
+            
+            Action.RIGHT_CLICK_BLOCK -> {
+                val pair = createRectangleMap[uuid]
+                if(pair == null) {
+                    createRectangleMap[uuid] = LocationPair(null, block.location)
+                } else {
+                    pair.second = block.location
+                }
+                
+                player.info("成功选取第 &f二 &7个点")
+            }
+            
+            else -> {}
+        }
+    }
+    
+    @SubscribeEvent
     fun createInteract(event: PlayerInteractEvent) {
         val block = event.clickedBlock ?: return
         if (block.type == Material.AIR || event.hand == EquipmentSlot.OFF_HAND) {
             return
         }
         //物品判断
-        if (event.item == null || event.item!!.type != Barrier.getTool()) {
+        val item = event.item
+        if (item == null || item.type == Material.AIR || item.type != Barrier.getTool()) {
             return
         }
         when (event.action) {

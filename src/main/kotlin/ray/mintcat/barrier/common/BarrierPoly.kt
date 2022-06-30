@@ -23,7 +23,8 @@ class BarrierPoly(
     var door: Location,
     val nodes: MutableList<@Serializable(with = LocationSerializer::class) Location> = mutableListOf(),
     val permissions: MutableMap<String, Boolean> = mutableMapOf(),
-    val users: MutableMap<String, MutableMap<String, Boolean>> = mutableMapOf()
+    val users: MutableMap<String, MutableMap<String, Boolean>> = mutableMapOf(),
+    val rectangleLocation: LocationPair = LocationPair(null, null)
 ) {
 
     fun teleport(player: Player) {
@@ -62,6 +63,11 @@ class BarrierPoly(
 
     fun inNode(pointR: Location): Boolean {
         val point = pointR.block.location
+        
+        if(rectangleLocation.isComplete()) {
+            return PolyUtils.rectangleIntersectionJudgement(LocationPair(point, point), rectangleLocation)
+        }
+        
         if (PolyUtils.pointInPolygon(point, getLineSegment(this))) {
             return true
         } else {

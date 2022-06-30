@@ -2,6 +2,9 @@ package ray.mintcat.barrier.utils
 
 import org.bukkit.Location
 import ray.mintcat.barrier.common.BarrierPoly
+import ray.mintcat.barrier.common.LocationPair
+import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -25,7 +28,46 @@ object PolyUtils {
     或者是反向多边形2的所有点在多边形1的内部或边线上，二者满足其一即可；
     */
     fun isCoincidence(p1: BarrierPoly, p2: BarrierPoly): Boolean {
+        var cnt = 0
+        if(p1.rectangleLocation.isComplete()) cnt++
+        if(p2.rectangleLocation.isComplete()) cnt++
+        
+        if(cnt >= 2) {
+            return rectangleIntersectionJudgement(p1.rectangleLocation, p2.rectangleLocation)
+        } else if(cnt == 1) return false
+        
         return intersectionJudgment(p1, p2)
+    }
+    
+    fun rectangleIntersectionJudgement(locationPair1: LocationPair, locationPair2: LocationPair): Boolean {
+        val first1 = locationPair1.first ?: return false
+        val second1 = locationPair1.second ?: return false
+        val first2 = locationPair2.first ?: return false
+        val second2 = locationPair2.second ?: return false
+        
+        val x1Min = min(first1.blockX, second1.blockX)
+        val y1Min = min(first1.blockY, second1.blockY)
+        val z1Min = min(first1.blockZ, second1.blockZ)
+        val x1Max = max(first1.blockX, second1.blockX)
+        val y1Max = max(first1.blockY, second1.blockY)
+        val z1Max = max(first1.blockZ, second1.blockZ)
+
+        val x2Min = min(first2.blockX, second2.blockX)
+        val y2Min = min(first2.blockY, second2.blockY)
+        val z2Min = min(first2.blockZ, second2.blockZ)
+        val x2Max = max(first2.blockX, second2.blockX)
+        val y2Max = max(first2.blockY, second2.blockY)
+        val z2Max = max(first2.blockZ, second2.blockZ)
+
+        if ((x1Max in x2Min..x2Max) || (x1Min in x2Min..x2Max) || (x2Max in x1Min..x1Max) || (x2Min in x1Min..x1Max)) {
+            if ((y1Max in y2Min..y2Max) || (y1Min in y2Min..y2Max) || (y2Max in y1Min..y1Max) || (y2Min in y1Min..y1Max)) {
+                if ((z1Max in z2Min..z2Max) || (z1Min in z2Min..z2Max) || (z2Max in z1Min..z1Max) || (z2Min in z1Min..z1Max)) {
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
 
     /**
@@ -256,7 +298,7 @@ object PolyUtils {
     fun pointInPolygon(point: Location, lineSegments: List<LineSegment>): Boolean {
         // 点坐标
         val x: Double = point.x
-        val y: Double = point.z
+        val z: Double = point.z
         // 交点个数
         var intersectionNum = 0
         // 判断射线与多边形的交点个数
@@ -265,12 +307,12 @@ object PolyUtils {
             if (isCollinearIntersection(point, seg.prePoint, seg.lastPoint)) {
                 return true
             }
-            val maxY: Double = seg.prePoint.z.coerceAtLeast(seg.lastPoint.z)
-            val minY: Double = seg.prePoint.z.coerceAtMost(seg.lastPoint.z)
-            if (y >= minY && y < maxY) {
+            val maxZ: Double = seg.prePoint.z.coerceAtLeast(seg.lastPoint.z)
+            val minZ: Double = seg.prePoint.z.coerceAtMost(seg.lastPoint.z)
+            if (z >= minZ && z < maxZ) {
                 // 计算交点X坐标
                     val intersectionPointX =
-                    (y - seg.prePoint.z) * (seg.lastPoint.x - seg.prePoint.x) / seg.lastPoint.z - seg.prePoint.z + seg.prePoint.x
+                    (z - seg.prePoint.z) * (seg.lastPoint.x - seg.prePoint.x) / seg.lastPoint.z - seg.prePoint.z + seg.prePoint.x
                 if (x > intersectionPointX) {
                     intersectionNum++
                 }

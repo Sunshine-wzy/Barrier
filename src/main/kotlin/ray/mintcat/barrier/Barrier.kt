@@ -44,6 +44,10 @@ object Barrier : Plugin() {
     fun getTool(): Material {
         return Material.valueOf(config.getString("ClaimTool", "APPLE")!!)
     }
+    
+    fun getRectangleTool(): Material {
+        return Material.valueOf(config.getString("RectangleClaimTool", "GOLDEN_HOE")!!)
+    }
 
     private val json = Json {
         coerceInputValues = true
